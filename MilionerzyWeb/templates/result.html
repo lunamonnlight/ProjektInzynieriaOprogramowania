@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>MISSION REPORT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff0055;
+            --bg-dark: #050510;
+        }
+        body {
+            margin: 0; padding: 0; background: var(--bg-dark); color: white;
+            font-family: 'Exo 2', sans-serif; height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; perspective: 1000px;
+        }
+
+        #particles-js { position: absolute; width: 100%; height: 100%; z-index: 0; }
+        .cyber-grid {
+            position: absolute; width: 200%; height: 200%; bottom: -50%;
+            background-image: linear-gradient(var(--neon-blue) 1px, transparent 1px),
+            linear-gradient(90deg, var(--neon-blue) 1px, transparent 1px);
+            background-size: 50px 50px; opacity: 0.1;
+            transform: perspective(500px) rotateX(60deg);
+            animation: gridMove 20s linear infinite; z-index: 0; pointer-events: none;
+        }
+        @keyframes gridMove { 0% { transform: perspective(500px) rotateX(60deg) translateY(0); } 100% { transform: perspective(500px) rotateX(60deg) translateY(50px); } }
+
+        /* KARTA 3D */
+        .result-card {
+            position: relative; z-index: 10;
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px);
+            padding: 50px; border-radius: 20px;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
+            text-align: center; width: 90%; max-width: 500px;
+            transform-style: preserve-3d;
+        }
+
+        /* Glitch Title */
+        h1 {
+            font-size: 3rem; margin: 0; font-weight: 900; text-transform: uppercase;
+            position: relative; text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-blue);
+            animation: glitch 1s infinite alternate;
+        }
+        @keyframes glitch { 0% { text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-blue); } 100% { text-shadow: -2px -2px var(--neon-pink), 2px 2px var(--neon-blue); } }
+
+        h2 { font-family: 'Share Tech Mono'; color: var(--neon-blue); letter-spacing: 2px; margin-bottom: 30px; }
+
+        .score-box {
+            border: 2px solid white; padding: 20px; margin: 20px 0;
+            background: rgba(0,0,0,0.5); border-radius: 10px;
+        }
+        .score-val { font-size: 4rem; color: #ffd700; font-weight: bold; text-shadow: 0 0 20px #ffd700; }
+
+        .badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+        .badge {
+            background: rgba(255, 215, 0, 0.1); border: 1px solid gold; color: gold;
+            padding: 8px 15px; border-radius: 20px; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        .btn-group { margin-top: 40px; display: flex; gap: 10px; justify-content: center; }
+        button {
+            background: var(--neon-pink); border: none; padding: 15px 30px;
+            color: white; font-weight: bold; font-family: 'Exo 2'; cursor: pointer;
+            text-transform: uppercase; transition: 0.3s;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        button:hover { box-shadow: 0 0 20px var(--neon-pink); transform: scale(1.05); }
+        .btn-sec { background: transparent; border: 1px solid white; }
+        .btn-sec:hover { background: white; color: black; box-shadow: 0 0 20px white; }
+
+    </style>
+</head>
+<body>
+    <div class="cyber-grid"></div>
+    <div id="particles-js"></div>
+
+    <div class="result-card" id="tilt-card">
+        <h1>RAPORT MISJI</h1>
+        <h2>AGENT: {{ nick }}</h2>
+
+        <div class="score-box">
+            <div style="font-size: 0.9rem; letter-spacing: 2px;">POZYSKANE ŚRODKI</div>
+            <div class="score-val">{{ score }}</div>
+            <div style="font-size: 1.2rem;">PLN</div>
+        </div>
+
+        <div class="badges">
+            {% if badges %}
+                {% for b in badges %}
+                    <div class="badge"><i class="fas fa-medal"></i> {{ b }}</div>
+                {% endfor %}
+            {% else %}
+                <span style="color: gray">BRAK DODATKOWYCH ODZNACZEŃ</span>
+            {% endif %}
+        </div>
+
+        <div class="btn-group">
+            <a href="/"><button class="btn-sec">RESTART</button></a>
+            <a href="/ranking"><button>RANKING</button></a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", { "particles": { "number": { "value": 80 }, "color": { "value": "#ffffff" }, "opacity": { "value": 0.2 }, "size": { "value": 2 }, "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.1, "width": 1 }, "move": { "enable": true, "speed": 1 } } });
+
+        const card = document.getElementById('tilt-card');
+        document.body.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+    </script>
+</body>
+</html>

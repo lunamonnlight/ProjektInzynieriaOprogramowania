@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodaj Pytanie</title>
+    <style>
+        body { background-color: #0d1137; color: white; font-family: sans-serif; padding: 20px; text-align: center; }
+        input, textarea { width: 90%; max-width: 400px; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        button { background: #00ff00; padding: 15px 30px; border-radius: 50px; border: none; font-size: 1.2em; cursor: pointer; font-weight: bold; }
+        .success { color: #00ff00; font-size: 1.5em; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Zaproponuj Pytanie</h1>
+    <p>Zostań współtwórcą bazy!</p>
+
+    {% if success %}
+        <div class="success">✅ Pytanie wysłane do weryfikacji!</div>
+    {% endif %}
+
+    <form method="POST">
+        <textarea name="question" placeholder="Treść pytania" rows="3" required></textarea><br>
+        <input type="text" name="good_answer" placeholder="Poprawna odpowiedź" style="border: 2px solid #00ff00;" required><br>
+        <input type="text" name="bad1" placeholder="Błędna odpowiedź 1" required><br>
+        <input type="text" name="bad2" placeholder="Błędna odpowiedź 2"><br>
+        <input type="text" name="bad3" placeholder="Błędna odpowiedź 3"><br>
+        <textarea name="info" placeholder="Wyjaśnienie (dlaczego ta jest poprawna?)" rows="2"></textarea><br>
+        <br>
+        <button type="submit">WYŚLIJ</button>
+    </form>
+    <br>
+    <a href="/" style="color: white;">Wróć do Menu</a>
+</body>
+</html>

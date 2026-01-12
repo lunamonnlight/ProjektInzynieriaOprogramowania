@@ -1,0 +1,222 @@
+[
+    {
+        "p": "Co jest głównym artefaktem w Scrumie, który zawiera listę wszystkich wymagań i funkcji do zrobienia w produkcie?",
+        "odp": [
+            "Product Backlog",
+            "Sprint Backlog",
+            "Wykres spalania (Burndown Chart)",
+            "Dokumentacja Techniczna"
+        ],
+        "ok": "Product Backlog",
+        "info": "Product Backlog to uporządkowana lista wszystkiego, co może być potrzebne w produkcie. Jest jedynym źródłem wymagań dla wszelkich zmian wprowadzanych w produkcie."
+    },
+    {
+        "p": "Kto w zespole Scrumowym jest jedyną osobą odpowiedzialną za zarządzanie Backlogiem Produktu?",
+        "odp": [
+            "Product Owner",
+            "Scrum Master",
+            "Zespół Deweloperski",
+            "Interesariusz (Stakeholder)"
+        ],
+        "ok": "Product Owner",
+        "info": "Product Owner (Właściciel Produktu) odpowiada za maksymalizację wartości produktu i pracy Zespołu Deweloperskiego. Tylko on zarządza Backlogiem."
+    },
+    {
+        "p": "W modelu kaskadowym (Waterfall), co musi się stać, aby przejść do kolejnej fazy?",
+        "odp": [
+            "Poprzednia faza musi zostać całkowicie zakończona i zatwierdzona",
+            "Można przechodzić płynnie między fazami w dowolnym momencie",
+            "Należy napisać kod przed zebraniem wymagań",
+            "Trzeba wykonać Daily Scrum"
+        ],
+        "ok": "Poprzednia faza musi zostać całkowicie zakończona i zatwierdzona",
+        "info": "Model kaskadowy jest liniowy. Każdy etap (np. Analiza) musi się zakończyć (powstaniem dokumentu), zanim rozpocznie się następny (np. Projektowanie)."
+    },
+    {
+        "p": "Który rodzaj wymagań określa 'jak system ma działać' (np. wydajność, niezawodność, bezpieczeństwo)?",
+        "odp": [
+            "Wymagania niefunkcjonalne",
+            "Wymagania funkcjonalne",
+            "Wymagania biznesowe",
+            "Historyjki użytkownika"
+        ],
+        "ok": "Wymagania niefunkcjonalne",
+        "info": "Wymagania funkcjonalne mówią CO system robi (np. 'dodaj użytkownika'), a niefunkcjonalne JAK to robi (np. 'w czasie poniżej 1 sekundy')."
+    },
+    {
+        "p": "Diagram UML przedstawiający interakcje między obiektami w czasie (chronologiczna sekwencja zdarzeń) to:",
+        "odp": [
+            "Diagram sekwencji (przebiegu)",
+            "Diagram klas",
+            "Diagram przypadków użycia",
+            "Diagram wdrożenia"
+        ],
+        "ok": "Diagram sekwencji (przebiegu)",
+        "info": "Diagram sekwencji kładzie nacisk na czasową kolejność komunikatów wymienianych między obiektami (liniami życia)."
+    },
+    {
+        "p": "Metoda testowania, w której tester NIE zna kodu źródłowego i sprawdza system tylko przez interfejs, to:",
+        "odp": [
+            "Czarna skrzynka (Black box)",
+            "Biała skrzynka (White box)",
+            "Testy jednostkowe",
+            "Analiza statyczna kodu"
+        ],
+        "ok": "Czarna skrzynka (Black box)",
+        "info": "W metodzie czarnej skrzynki tester wciela się w rolę użytkownika i nie obchodzi go, jak kod wygląda w środku, lecz czy wynik działania jest poprawny."
+    },
+    {
+        "p": "Co oznacza skrót SLA w kontekście niezawodności oprogramowania?",
+        "odp": [
+            "Service Level Agreement",
+            "System Level Analysis",
+            "Software Lifecycle Agile",
+            "Secure Local Access"
+        ],
+        "ok": "Service Level Agreement",
+        "info": "SLA (Umowa o poziomie świadczenia usług) to dokument określający gwarantowany poziom niezawodności i dostępności systemu (np. 99.9%)."
+    },
+    {
+        "p": "Jakie są trzy filary empirycznej kontroli procesu w Scrumie?",
+        "odp": [
+            "Przejrzystość, Inspekcja, Adaptacja",
+            "Planowanie, Wykonanie, Testowanie",
+            "Ludzie, Procesy, Narzędzia",
+            "Backlog, Sprint, Increment"
+        ],
+        "ok": "Przejrzystość, Inspekcja, Adaptacja",
+        "info": "Scrum opiera się na empiryzmie: musimy widzieć co się dzieje (Przejrzystość), sprawdzać to często (Inspekcja) i zmieniać kurs w razie potrzeby (Adaptacja)."
+    },
+    {
+        "p": "Co oznacza skrót MTBF w inżynierii niezawodności?",
+        "odp": [
+            "Mean Time Between Failures (Średni czas między awariami)",
+            "Maximum Time Before Fail (Maksymalny czas przed błędem)",
+            "Mean Test Break Function (Średnia funkcja przerwania testu)",
+            "Most Tested Big File (Najbardziej przetestowany duży plik)"
+        ],
+        "ok": "Mean Time Between Failures (Średni czas między awariami)",
+        "info": "MTBF to kluczowa miara niezawodności, mówiąca jak długo system przeciętnie działa poprawnie między wystąpieniem usterek."
+    },
+    {
+        "p": "W technice priorytetyzacji wymagań MoSCoW, litera 'M' oznacza:",
+        "odp": [
+            "Must have (Musi być)",
+            "Maybe (Może być)",
+            "Money (Kosztowne)",
+            "Minimum (Minimalne)"
+        ],
+        "ok": "Must have (Musi być)",
+        "info": "MoSCoW to: Must have (krytyczne), Should have (ważne), Could have (przydatne), Won't have (nie tym razem)."
+    },
+    {
+        "p": "Który wzorzec architektoniczny dzieli aplikację na trzy główne komponenty: Model, Widok i Kontroler?",
+        "odp": [
+            "MVC (Model-View-Controller)",
+            "Klient-Serwer",
+            "Architektura warstwowa",
+            "Mikroserwisy"
+        ],
+        "ok": "MVC (Model-View-Controller)",
+        "info": "MVC separuje logikę biznesową (Model), warstwę prezentacji (Widok) i sterowanie przepływem (Kontroler), co ułatwia zarządzanie kodem."
+    },
+    {
+        "p": "Według 'Raportu Chaos' (Standish Group) z 1994 r., jaki procent projektów zakończył się pełnym sukcesem?",
+        "odp": [
+            "16.2%",
+            "31.1%",
+            "52.7%",
+            "80%"
+        ],
+        "ok": "16.2%",
+        "info": "Raport Chaos z 1994 roku wstrząsnął branżą IT, pokazując, że ogromna większość projektów kończyła się porażką lub przekroczeniem budżetu."
+    },
+    {
+        "p": "Testy jednostkowe (Unit Tests) są zazwyczaj pisane przez:",
+        "odp": [
+            "Programistów",
+            "Klientów",
+            "Scrum Mastera",
+            "Użytkowników końcowych"
+        ],
+        "ok": "Programistów",
+        "info": "Testy jednostkowe sprawdzają najmniejsze fragmenty kodu (funkcje/metody) i są pisane przez autora kodu w trakcie developmentu."
+    },
+    {
+        "p": "Co to jest 'Refaktoryzacja'?",
+        "odp": [
+            "Zmiana struktury kodu bez zmiany jego zachowania zewnętrznego",
+            "Dodawanie nowych funkcjonalności do systemu",
+            "Naprawianie zgłoszonych błędów krytycznych",
+            "Pisanie dokumentacji projektowej"
+        ],
+        "ok": "Zmiana struktury kodu bez zmiany jego zachowania zewnętrznego",
+        "info": "Refaktoryzacja to 'sprzątanie' kodu – poprawianie jego czytelności i jakości, ale bez zmiany tego, co program robi dla użytkownika."
+    },
+    {
+        "p": "Weryfikacja (w modelu V) odpowiada na pytanie:",
+        "odp": [
+            "Czy budujemy produkt poprawnie? (zgodnie ze specyfikacją)",
+            "Czy budujemy poprawny produkt? (zgodnie z potrzebą klienta)",
+            "Czy produkt jest tani?",
+            "Czy produkt ładnie wygląda?"
+        ],
+        "ok": "Czy budujemy produkt poprawnie? (zgodnie ze specyfikacją)",
+        "info": "Weryfikacja sprawdza zgodność z dokumentacją techniczną. Walidacja (to drugie pytanie) sprawdza zgodność z rzeczywistą potrzebą klienta."
+    },
+    {
+        "p": "Aktor (Actor) w diagramie przypadków użycia UML reprezentuje:",
+        "odp": [
+            "Rolę użytkownika lub systemu zewnętrznego wchodzącego w interakcję z systemem",
+            "Konkretną osobę z imienia i nazwiska (np. Jan Kowalski)",
+            "Bazę danych wewnątrz systemu",
+            "Serwer fizyczny, na którym stoi aplikacja"
+        ],
+        "ok": "Rolę użytkownika lub systemu zewnętrznego wchodzącego w interakcję z systemem",
+        "info": "Aktor to abstrakcja – może to być 'Administrator', 'Klient' albo 'System Płatności', ale zawsze jest to byt zewnętrzny wobec systemu."
+    },
+    {
+        "p": "Co NIE jest ceremonią (wydarzeniem) w Scrumie?",
+        "odp": [
+            "Spotkanie statusowe z Prezesem",
+            "Daily Scrum (Codzienny Scrum)",
+            "Sprint Planning (Planowanie Sprintu)",
+            "Sprint Retrospective (Retrospektywa)"
+        ],
+        "ok": "Spotkanie statusowe z Prezesem",
+        "info": "Scrum definiuje konkretne zdarzenia: Planowanie, Daily, Przegląd (Review) i Retrospektywę. Spotkania z zarządem nie są częścią frameworka."
+    },
+    {
+        "p": "Technika 'Burzy Mózgów' (Brainstorming) służy do:",
+        "odp": [
+            "Generowania dużej liczby pomysłów w krótkim czasie bez ich natychmiastowej krytyki",
+            "Szczegółowego dokumentowania wymagań prawnych",
+            "Testowania wydajności systemu",
+            "Wyboru jednego najlepszego rozwiązania przez głosowanie"
+        ],
+        "ok": "Generowania dużej liczby pomysłów w krótkim czasie bez ich natychmiastowej krytyki",
+        "info": "Celem burzy mózgów jest ilość, a nie jakość na pierwszym etapie. Krytyka zabija kreatywność, więc ocena pomysłów następuje później."
+    },
+    {
+        "p": "Dostępność systemu na poziomie 99,9% ('trzy dziewiątki') dopuszcza roczny przestój w okolicach:",
+        "odp": [
+            "Około 9 godzin (8.76 h)",
+            "Około 3 dni",
+            "Około 5 minut",
+            "Około 52 minut"
+        ],
+        "ok": "Około 9 godzin (8.76 h)",
+        "info": "Im więcej dziewiątek, tym mniej czasu na awarię. 99.999% ('pięć dziewiątek') to tylko około 5 minut przestoju rocznie!"
+    },
+    {
+        "p": "Definition of Done (DoD) w Scrumie to:",
+        "odp": [
+            "Wspólne zrozumienie tego, co musi zostać zrobione, aby uznać pracę za ukończoną",
+            "Lista zadań do zrobienia w przyszłym roku",
+            "Dokumentacja techniczna pisana po zakończeniu projektu",
+            "Decyzja kierownika projektu o zakończeniu prac"
+        ],
+        "ok": "Wspólne zrozumienie tego, co musi zostać zrobione, aby uznać pracę za ukończoną",
+        "info": "DoD to checklist jakości (np. 'kod napisany, przetestowany, zmergowany'). Bez spełnienia DoD element nie jest uznawany za gotowy."
+    }
+]

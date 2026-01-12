@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM_IO_INIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff0055;
+            --bg-dark: #050510;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Exo 2', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px; /* Do efektu 3D */
+        }
+
+        /* --- INTRO TERMINAL --- */
+        #intro-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-blue);
+        }
+        .terminal-text { font-size: 1.5rem; text-align: left; width: 300px; }
+        .cursor { display: inline-block; width: 10px; height: 20px; background: var(--neon-blue); animation: blink 0.5s infinite; }
+
+        /* --- TŁO --- */
+        #particles-js {
+            position: absolute; width: 100%; height: 100%; z-index: 0;
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+        }
+        
+        /* Siatka w tle (Grid) */
+        .cyber-grid {
+            position: absolute; width: 200%; height: 200%; bottom: -50%;
+            background-image: linear-gradient(var(--neon-blue) 1px, transparent 1px),
+            linear-gradient(90deg, var(--neon-blue) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: center center;
+            opacity: 0.1;
+            transform: perspective(500px) rotateX(60deg);
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* --- GŁÓWNA KARTA (Tilt Effect) --- */
+        .container {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            padding: 50px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.1);
+            text-align: center;
+            width: 90%; max-width: 450px;
+            transform-style: preserve-3d; /* Ważne dla 3D */
+            transition: transform 0.1s;
+            opacity: 0; /* Ukryte na start, intro je pokaże */
+        }
+        
+        /* Dekoracyjne rogi */
+        .corner {
+            position: absolute; width: 30px; height: 30px;
+            border: 3px solid var(--neon-blue);
+            transition: 0.3s;
+        }
+        .tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        /* --- GLITCH TITLE --- */
+        .glitch-wrapper {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        
+        h1.glitch {
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            position: relative;
+            color: white;
+            letter-spacing: 3px;
+            margin: 0;
+            text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-blue);
+        }
+
+        h1.glitch::before, h1.glitch::after {
+            content: attr(data-text);
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark);
+        }
+
+        h1.glitch::before {
+            left: 2px; text-shadow: -1px 0 var(--neon-pink);
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+
+        h1.glitch::after {
+            left: -2px; text-shadow: -1px 0 var(--neon-blue);
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+
+        h3 {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-blue);
+            font-size: 1.1rem;
+            margin-top: 5px; margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* --- INPUT & BUTTONS --- */
+        input {
+            width: 100%; box-sizing: border-box;
+            padding: 15px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid #333;
+            color: white;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: 0.3s;
+            border-radius: 5px;
+        }
+        input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            outline: none;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, var(--neon-pink), #bc13fe);
+            border: none;
+            color: white;
+            font-weight: 900;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 2px;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            transition: 0.3s;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        
+        .btn-main:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--neon-pink);
+        }
+
+        .btn-links {
+            display: flex; gap: 10px; margin-top: 20px; justify-content: center;
+        }
+        
+        .btn-link {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #aaa;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .btn-link:hover { border-color: var(--neon-blue); color: white; background: rgba(0, 243, 255, 0.1); }
+        .btn-add:hover { border-color: gold; color: gold; background: rgba(255, 215, 0, 0.1); }
+
+        /* --- ANIMACJE --- */
+        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes gridMove { 0% { transform: perspective(500px) rotateX(60deg) translateY(0); } 100% { transform: perspective(500px) rotateX(60deg) translateY(50px); } }
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 81px, 0); }
+            20% { clip: rect(5px, 9999px, 100px, 0); }
+            40% { clip: rect(90px, 9999px, 30px, 0); }
+            60% { clip: rect(40px, 9999px, 5px, 0); }
+            80% { clip: rect(20px, 9999px, 120px, 0); }
+            100% { clip: rect(60px, 9999px, 70px, 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(60px, 9999px, 10px, 0); }
+            20% { clip: rect(20px, 9999px, 80px, 0); }
+            40% { clip: rect(5px, 9999px, 120px, 0); }
+            60% { clip: rect(110px, 9999px, 40px, 0); }
+            80% { clip: rect(70px, 9999px, 10px, 0); }
+            100% { clip: rect(30px, 9999px, 90px, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-layer">
+        <div class="terminal-text">
+            > SYSTEM BOOT...<br>
+            > LOADING MODULES...<br>
+            > CONNECTING TO SERVER...<br>
+            > ACCESS GRANTED.<span class="cursor"></span>
+        </div>
+    </div>
+
+    <div id="particles-js"></div>
+    <div class="cyber-grid"></div>
+
+    <div class="container" id="tilt-card">
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+
+        <div class="glitch-wrapper">
+            <h1 class="glitch" data-text="MILIONERZY">MILIONERZY</h1>
+        </div>
+        <h3>INŻYNIERIA OPROGRAMOWANIA</h3>
+        
+        <form action="/start" method="POST">
+            <input type="text" name="nick" placeholder="WPROWADŹ ID AGENTA" required autocomplete="off">
+            <button class="btn-main" type="submit">INICJUJ PROTOKÓŁ</button>
+        </form>
+
+        <div class="btn-links">
+            <a href="/ranking" class="btn-link"><i class="fas fa-database"></i> BAZA WYNIKÓW</a>
+            <a href="/add_question" class="btn-link btn-add"><i class="fas fa-plus"></i> DODAJ DANE</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // 1. INTRO SEQUENCE
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const intro = document.getElementById('intro-layer');
+                const card = document.getElementById('tilt-card');
+                
+                intro.style.transition = "opacity 0.8s ease";
+                intro.style.opacity = "0";
+                
+                setTimeout(() => {
+                    intro.style.display = "none";
+                    card.style.transition = "opacity 1s, transform 0.1s"; // Reset transition for tilt
+                    card.style.opacity = "1";
+                }, 800);
+            }, 2500); // Intro trwa 2.5 sekundy
+        });
+
+        // 2. PARTICLES CONFIG
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 100 },
+                "color": { "value": "#00f3ff" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5, "random": true },
+                "size": { "value": 2, "random": true },
+                "line_linked": { "enable": true, "distance": 120, "color": "#00f3ff", "opacity": 0.2, "width": 1 },
+                "move": { "enable": true, "speed": 1 }
+            },
+            "interactivity": {
+                "detect_on": "window",
+                "events": { "onhover": { "enable": true, "mode": "grab" } }
+            }
+        });
+
+        // 3. 3D TILT EFFECT
+        const card = document.getElementById('tilt-card');
+        const container = document.body;
+
+        container.addEventListener('mousemove', (e) => {
+            if(window.getComputedStyle(document.getElementById('intro-layer')).display !== 'none') return;
+
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            
+            card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+
+        // Reset pozycji myszki po wyjściu
+        container.addEventListener('mouseleave', () => {
+            card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+            card.style.transition = "all 0.5s ease";
+        });
+        
+        container.addEventListener('mouseenter', () => {
+             card.style.transition = "none";
+        });
+    </script>
+</body>
+</html>
