@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>MILIONERZY - GRA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --neon-blue: #00f3ff; --neon-pink: #ff0055; --neon-green: #0aff00; --bg-dark: #050510; }
+        body { margin: 0; padding: 20px; background: var(--bg-dark); color: white; font-family: 'Exo 2'; display: flex; flex-direction: column; align-items: center; }
+        .top-bar { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--neon-blue); padding: 15px; margin-bottom: 20px; background: rgba(0,20,40,0.7); }
+        .btn-lobby { background: transparent; border: 1px solid var(--neon-pink); color: var(--neon-pink); padding: 8px 15px; cursor: pointer; font-family: 'Share Tech Mono'; font-size: 0.8rem; text-transform: uppercase; }
+        .question-box { width: 100%; max-width: 900px; background: rgba(0,0,0,0.6); border-left: 5px solid var(--neon-blue); padding: 40px; text-align: center; font-size: 1.5rem; margin-bottom: 30px; }
+
+        /* Stylistyka Bet Panel */
+        .bet-card { background: rgba(255,215,0,0.05); border: 1px solid gold; padding: 20px; width: 100%; max-width: 900px; }
+        .bet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .bet-item { background: rgba(0,0,0,0.4); border: 1px solid #444; padding: 15px; text-align: center; }
+        .bet-controls { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 10px; }
+        .btn-calc { background: #222; border: 1px solid gold; color: gold; width: 40px; height: 40px; cursor: pointer; font-size: 1.2rem; }
+        .btn-calc:hover { background: gold; color: black; }
+        .bet-amount-display { font-family: 'Share Tech Mono'; font-size: 1.2rem; min-width: 100px; }
+
+        /* Standard Answers */
+        .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 900px; }
+        .answer-btn { background: rgba(255,255,255,0.05); border: 1px solid #444; padding: 25px; color: white; cursor: pointer; font-size: 1.1rem; }
+        .answer-btn:hover:not(:disabled) { border-color: var(--neon-blue); background: rgba(0,243,255,0.1); }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
+        .modal-content { background: #050510; border: 2px solid var(--neon-blue); padding: 40px; max-width: 500px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <button class="btn-lobby" onclick="if(confirm('Wrócić do lobby?')) location.href='/'">LOBBY</button>
+        <div style="color:var(--neon-blue); font-family:'Share Tech Mono'; font-size: 1.2rem;">
+            {% if mode == 'bet' %}KAPITAŁ: {{ money }} PLN{% else %}ETAP: {{ q_num }} / 12{% endif %}
+        </div>
+    </div>
+
+    <div class="question-box">{{ question }}</div>
+
+    {% if mode == 'bet' %}
+    <div class="bet-card">
+        <div style="text-align:center; color:gold; font-family:'Share Tech Mono'; margin-bottom:15px;">
+            DO ROZDYSPONOWANIA: <span id="rem-val">{{ money }}</span> PLN
+        </div>
+        <div class="bet-grid">
+            {% for opt in options %}
+            <div class="bet-item">
+                <div style="font-size:0.8rem; margin-bottom:10px;">{{ opt }}</div>
+                <div class="bet-controls">
+                    <button class="btn-calc" onclick="adj('{{ opt }}', -50000)">-</button>
+                    <span class="bet-amount-display" id="disp-{{ loop.index0 }}">0</span>
+                    <button class="btn-calc" onclick="adj('{{ opt }}', 50000)">+</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button onclick="sendBets()" style="width:100%; margin-top:20px; padding:15px; background:gold; font-weight:bold; cursor:pointer;">SPRAWDŹ ZAKŁADY</button>
+    </div>
+    {% else %}
+    <div class="answers-grid">
+        {% for opt in options %}
+        <button class="answer-btn" onclick="checkNormal('{{ opt }}')">{{ opt }}</button>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <h2 id="mTitle" style="font-family:'Share Tech Mono';">RAPORT</h2>
+            <p id="mText" style="line-height:1.6;"></p>
+            <button id="mBtn" style="background:var(--neon-green); border:none; padding:15px; font-weight:bold; cursor:pointer; width:100%;">KONTYNUUJ >></button>
+        </div>
+    </div>
+
+    <script>
+        const totalCapital = parseInt("{{ money }}");
+        const optionsList = JSON.parse('{{ options | tojson }}');
+        let bets = optionsList.reduce((a, o) => ({...a, [o]: 0}), {});
+
+        function adj(opt, delta) {
+            let currentSum = Object.values(bets).reduce((a, b) => a + b, 0);
+            if (delta > 0 && currentSum + delta > totalCapital) {
+                alert("Brak środków!"); return;
+            }
+            if (delta < 0 && bets[opt] + delta < 0) return;
+            bets[opt] += delta;
+
+            // Update UI
+            document.getElementById('rem-val').innerText = (totalCapital - (currentSum + delta)).toLocaleString();
+            optionsList.forEach((o, i) => {
+                document.getElementById(`disp-${i}`).innerText = bets[o].toLocaleString();
+            });
+        }
+
+        function showModal(data) {
+            document.getElementById('mText').innerHTML = data.info;
+            document.getElementById('mTitle').innerText = (data.status === 'fail') ? "KONIEC" : "RAPORT";
+
+            // NAPRAWIONA LOGIKA PRZYCISKU
+            document.getElementById('mBtn').onclick = () => {
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    window.location.reload();
+                }
+            };
+            document.getElementById('infoModal').style.display = 'flex';
+        }
+
+        function checkNormal(ans) {
+            fetch('/check', { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: 'answer=' + encodeURIComponent(ans) })
+            .then(r => r.json()).then(data => showModal(data));
+        }
+
+        function sendBets() {
+            let sum = Object.values(bets).reduce((a, b) => a + b, 0);
+            if (sum !== totalCapital) { alert("Rozdziel całą kwotę!"); return; }
+            fetch('/check', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ bets: bets }) })
+            .then(r => r.json()).then(data => showModal(data));
+        }
+    </script>
+</body>
+</html>
+``
