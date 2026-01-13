@@ -9,7 +9,7 @@ app.secret_key = 'super_tajny_klucz_projektu_io'
 
 # Konfiguracja progów pieniężnych dla trybu klasycznego
 PROGI = [500, 1000, 2000, 5000, 10000, 20000, 40000, 75000, 125000, 250000, 500000, 1000000]
-GWARANTOWANE = {1: 1000, 6: 40000}  # Indeksy progów gwarantowanych
+GWARANTOWANE = {1: 1000, 6: 40000}  # Indeksy progów gwarantowanych (0-indexed logic)
 
 
 # --- FUNKCJE POMOCNICZE DO OBSŁUGI PLIKÓW JSON ---
@@ -89,6 +89,7 @@ def start():
     session['mode'] = mode
     session['questions'] = random.sample(all_questions, num_q)
     session['current_index'] = 0
+    # Inicjalizacja kół ratunkowych (nawet jeśli tryb ich nie używa, inicjalizujemy dla bezpieczeństwa)
     session['lifelines'] = {"5050": True, "phone": True, "audience": True}
     session['money'] = 1000000 if mode == 'bet' else 0
     session['start_time'] = time.time()
@@ -123,7 +124,8 @@ def game():
                            q_num=idx + 1,
                            total_q=len(session['questions']),
                            mode=session['mode'],
-                           lifelines=session['lifelines'])
+                           lifelines=session['lifelines'],
+                           thresholds=PROGI)  # Przekazanie listy progów do szablonu
 
 
 @app.route('/check', methods=['POST'])
@@ -194,9 +196,12 @@ def check():
             # Klasyczna przegrana - obliczanie kwoty gwarantowanej
             idx = session['current_index']
             win_amount = 0
-            for threshold_idx, amount in GWARANTOWANE.items():
-                if idx > threshold_idx:
-                    win_amount = amount
+
+            # Progi gwarantowane: 1000 (po 2 pyt) i 40000 (po 7 pyt)
+            if idx > 6:
+                win_amount = 40000
+            elif idx > 1:
+                win_amount = 1000
 
             badges = calculate_badges(False)
             save_score(session['nick'], win_amount, badges)
@@ -212,12 +217,12 @@ def check():
 
 @app.route('/lifeline/<type>')
 def lifeline(type):
+    # Blokada kół ratunkowych w trybach innych niż klasyczny
+    if session.get('mode') != 'classic':
+        return jsonify({'status': 'error', 'msg': 'Koła niedostępne w tym trybie'})
+
     if not session.get('lifelines', {}).get(type):
         return jsonify({'status': 'used'})
-
-    # Koła ratunkowe nie są dostępne w trybie 'bet' (obsłużone w HTML, tu dla pewności)
-    if session.get('mode') == 'bet':
-        return jsonify({'status': 'error', 'msg': 'Niedostępne w tym trybie'})
 
     lifelines = session['lifelines']
     lifelines[type] = False
@@ -226,11 +231,26 @@ def lifeline(type):
     if type == '5050':
         correct = session['correct_answer']
         wrong = [o for o in session['current_options'] if o != correct]
+        # Zwracamy 2 błędne do ukrycia
         return jsonify({'status': 'ok', 'remove': random.sample(wrong, 2)})
     elif type == 'phone':
-        return jsonify({'status': 'ok', 'msg': f"Wydaje mi się, że poprawna odpowiedź to: {session['correct_answer']}"})
+        # Symulacja telefonu - 80% szans na poprawną
+        is_correct = random.random() < 0.8
+        ans = session['correct_answer'] if is_correct else random.choice(session['current_options'])
+
+        # Nowa treść wiadomości
+        msg_text = (
+            f"Dzwonisz do eksperta...<br><br>"
+            f"<b>dr hab. Viktoriia Onyshchenko:</b><br>"
+            f"<i>\"Przeanalizowałam strukturę tego problemu. "
+            f"Biorąc pod uwagę zasady inżynierii oprogramowania, "
+            f"wskazałabym na odpowiedź: <b>{ans}</b>.\"</i>"
+        )
+
+        return jsonify({'status': 'ok', 'msg': msg_text})
     elif type == 'audience':
-        return jsonify({'status': 'ok', 'msg': f"65% publiczności wskazuje na: {session['correct_answer']}"})
+        return jsonify({'status': 'ok',
+                        'msg': f"Głosowanie publiczności zakończone.<br>Większość (65%) wskazuje na: <b>{session['correct_answer']}</b>"})
 
     return jsonify({'status': 'error'})
 
