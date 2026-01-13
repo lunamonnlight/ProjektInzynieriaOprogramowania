@@ -43,32 +43,35 @@
             box-shadow: 0 0 30px rgba(0, 243, 255, 0.15);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            padding: 40px;
-            width: 100%; max-width: 800px;
+            padding: 20px;
+            width: 95%; max-width: 800px;
             text-align: center;
             position: relative;
             overflow: hidden;
             animation: fadeIn 0.8s ease-out;
+            box-sizing: border-box;
         }
 
         /* Pasek dekoracyjny na górze */
         .rank-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink)); }
 
         h1 {
-            font-family: 'Exo 2', sans-serif; font-weight: 900; font-size: 2.5rem; margin-bottom: 30px;
+            font-family: 'Exo 2', sans-serif; font-weight: 900; font-size: 2rem; margin-bottom: 30px;
             text-transform: uppercase; letter-spacing: 3px;
             text-shadow: 0 0 10px var(--neon-blue);
         }
 
-        /* --- TABELA --- */
+        /* --- TABELA RESPONSYWNA --- */
         .table-container {
             overflow-x: auto;
+            width: 100%;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             font-family: 'Share Tech Mono', monospace;
+            min-width: 500px; /* Zapobiega zbytniemu ściskaniu na mobile */
         }
 
         th {
@@ -99,7 +102,7 @@
         tr:nth-child(3) td { color: #cd7f32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.5); font-weight: bold; }
 
         .badge-icon {
-            background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 5px;
+            background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 5px; white-space: nowrap; display: inline-block; margin-bottom: 2px;
         }
 
         /* --- PANEL ADMINA --- */
@@ -117,7 +120,7 @@
 
         .admin-input {
             background: transparent; border: none; border-bottom: 1px solid var(--neon-pink);
-            color: var(--neon-pink); font-family: 'Share Tech Mono'; padding: 5px; width: 150px; text-align: center;
+            color: var(--neon-pink); font-family: 'Share Tech Mono'; padding: 5px; width: 100px; text-align: center;
         }
         .admin-input:focus { outline: none; box-shadow: 0 5px 10px -5px var(--neon-pink); }
 
@@ -165,7 +168,7 @@
                             <td>{{ loop.index }}</td>
                             <td>{{ score.nick }}</td>
                             <td>{{ score.wynik }}</td>
-                            <td style="font-size: 0.8em; text-align: left;">
+                            <td style="text-align: left;">
                                 {% if score.odznaki %}
                                     {% for b in score.odznaki %}
                                         <span class="badge-icon">{{ b }}</span>

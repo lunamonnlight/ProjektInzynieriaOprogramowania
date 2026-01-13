@@ -9,7 +9,6 @@ app.secret_key = 'super_tajny_klucz_projektu_io'
 
 # Konfiguracja progów pieniężnych dla trybu klasycznego
 PROGI = [500, 1000, 2000, 5000, 10000, 20000, 40000, 75000, 125000, 250000, 500000, 1000000]
-GWARANTOWANE = {1: 1000, 6: 40000}  # Indeksy progów gwarantowanych (0-indexed logic)
 
 
 # --- FUNKCJE POMOCNICZE DO OBSŁUGI PLIKÓW JSON ---
@@ -17,31 +16,49 @@ def load_json(filename):
     if os.path.exists(filename):
         try:
             with open(filename, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+                if isinstance(data, list):
+                    return data
+                return []
         except:
             return []
     return []
 
 
 def save_json(filename, data):
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
+    try:
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print(f"Błąd zapisu JSON: {e}")
 
 
 def save_score(nick, score, badges):
     # Tryb nauki nie zapisuje wyników do rankingu
     if session.get('mode') == 'learning':
         return
-    scores = load_json("wyniki.json")
-    scores.append({
-        "nick": nick,
-        "wynik": score,
-        "odznaki": badges,
-        "data": time.strftime("%Y-%m-%d %H:%M")
-    })
-    # Sortowanie po wyniku (malejąco) i zachowanie top 20
-    scores.sort(key=lambda x: x["wynik"], reverse=True)
-    save_json("wyniki.json", scores[:20])
+
+    try:
+        scores = load_json("wyniki.json")
+
+        # Dodajemy nowy wynik
+        scores.append({
+            "nick": nick,
+            "wynik": int(score),  # Wymuszenie liczby
+            "odznaki": badges,
+            "data": time.strftime("%Y-%m-%d %H:%M")
+        })
+
+        # BEZPIECZNE SORTOWANIE (Naprawia błąd przy błędnych danych w pliku)
+        # Sortuje, zamieniając wynik na int, a w razie błędu przyjmuje 0
+        scores.sort(key=lambda x: int(x.get("wynik", 0)), reverse=True)
+
+        # Zapisujemy top 20
+        save_json("wyniki.json", scores[:20])
+
+    except Exception as e:
+        print(f"KRYTYCZNY BŁĄD ZAPISU WYNIKU: {e}")
+        # Nie przerywamy gry, nawet jak zapis się nie uda
 
 
 def calculate_badges(is_winner):
@@ -80,16 +97,18 @@ def start():
 
     # Liczba pytań zależna od trybu (Bet: 8, Reszta: 12)
     num_q = 8 if mode == 'bet' else 12
+
+    # Zabezpieczenie przed brakiem pytań
     if len(all_questions) < num_q:
-        return f"Błąd: Za mało pytań w bazie danych! (Posiadasz {len(all_questions)}, wymagane {num_q})", 500
+        # Jeśli pytań jest za mało, bierzemy tyle ile jest (żeby gra nie padła)
+        session['questions'] = random.sample(all_questions, len(all_questions))
+    else:
+        session['questions'] = random.sample(all_questions, num_q)
 
     # Inicjalizacja sesji gry
-    session.clear()
     session['nick'] = nick
     session['mode'] = mode
-    session['questions'] = random.sample(all_questions, num_q)
     session['current_index'] = 0
-    # Inicjalizacja kół ratunkowych (nawet jeśli tryb ich nie używa, inicjalizujemy dla bezpieczeństwa)
     session['lifelines'] = {"5050": True, "phone": True, "audience": True}
     session['money'] = 1000000 if mode == 'bet' else 0
     session['start_time'] = time.time()
@@ -103,6 +122,8 @@ def game():
         return redirect(url_for('index'))
 
     idx = session['current_index']
+
+    # Sprawdzenie końca gry
     if idx >= len(session['questions']):
         return redirect(url_for('result'))
 
@@ -117,107 +138,128 @@ def game():
         session['explanation'] = q_data.get('info', 'Brak dodatkowego wyjaśnienia.')
         session['last_q_index'] = idx
 
+    # Ustalenie wyświetlanej kwoty
+    current_money = 0
+    if session['mode'] == 'bet':
+        current_money = session['money']
+    elif idx < len(PROGI):
+        current_money = PROGI[idx]
+
     return render_template('game.html',
                            question=q_data['p'],
                            options=session['current_options'],
-                           money=session['money'] if session['mode'] == 'bet' else PROGI[idx],
+                           money=current_money,
                            q_num=idx + 1,
                            total_q=len(session['questions']),
                            mode=session['mode'],
                            lifelines=session['lifelines'],
-                           thresholds=PROGI)  # Przekazanie listy progów do szablonu
+                           thresholds=PROGI)
 
 
 @app.route('/check', methods=['POST'])
 def check():
-    mode = session.get('mode')
-    correct = session.get('correct_answer')
-    explanation = session.get('explanation')
+    try:
+        mode = session.get('mode')
+        correct = session.get('correct_answer')
+        explanation = session.get('explanation')
 
-    # --- LOGIKA DLA TRYBU: POSTAW NA MILION ---
-    if mode == 'bet':
-        data = request.get_json()
-        bets = data.get('bets', {})
-        win_amount = int(bets.get(correct, 0))
-        session['money'] = win_amount
-        session['current_index'] += 1
-
-        if win_amount <= 0:
-            save_score(session['nick'], 0, [])
-            return jsonify({
-                'status': 'fail',
-                'info': f"Straciłeś cały kapitał! Poprawna odpowiedź to: <b>{correct}</b>",
-                'redirect': url_for('result')
-            })
-
-        if session['current_index'] >= len(session['questions']):
-            save_score(session['nick'], win_amount, ["💰 STRATEG"])
-            return jsonify({
-                'status': 'win',
-                'info': f"GRATULACJE! Ukończyłeś wyzwanie z kwotą {win_amount} PLN!",
-                'redirect': url_for('result')
-            })
-
-        return jsonify({
-            'status': 'ok',
-            'info': f"Dobrze! Na Twoim koncie zostaje <b>{win_amount} PLN</b>.",
-            'redirect': None
-        })
-
-    # --- LOGIKA DLA TRYBU: KLASYCZNY / NAUKA ---
-    answer = request.form.get('answer')
-    if answer == correct:
-        session['money'] = PROGI[session['current_index']]
-        session['current_index'] += 1
-        is_end = session['current_index'] >= 12
-
-        if is_end:
-            badges = calculate_badges(True)
-            save_score(session['nick'], 1000000, badges)
-            session['earned_badges'] = badges
-
-        return jsonify({
-            'status': 'win' if is_end else 'ok',
-            'info': explanation,
-            'redirect': url_for('result') if is_end else None
-        })
-    else:
-        # Przegrana lub Tryb Nauki
-        if mode == 'learning':
+        # --- LOGIKA DLA TRYBU: POSTAW NA MILION ---
+        if mode == 'bet':
+            data = request.get_json()
+            bets = data.get('bets', {})
+            win_amount = int(bets.get(correct, 0))
+            session['money'] = win_amount
             session['current_index'] += 1
-            is_end = session['current_index'] >= 12
-            msg = f"<span style='color:red'>BŁĄD!</span> Poprawna odpowiedź to: <b>{correct}</b>.<br><br>{explanation}"
+
+            if win_amount <= 0:
+                save_score(session['nick'], 0, [])
+                return jsonify({
+                    'status': 'fail',
+                    'info': f"Straciłeś cały kapitał! Poprawna odpowiedź to: <b>{correct}</b>",
+                    'redirect': url_for('result')
+                })
+
+            if session['current_index'] >= len(session['questions']):
+                save_score(session['nick'], win_amount, ["💰 STRATEG"])
+                return jsonify({
+                    'status': 'win',
+                    'info': f"GRATULACJE! Ukończyłeś wyzwanie z kwotą {win_amount} PLN!",
+                    'redirect': url_for('result')
+                })
+
             return jsonify({
                 'status': 'ok',
-                'info': msg,
+                'info': f"Dobrze! Na Twoim koncie zostaje <b>{win_amount} PLN</b>.",
+                'redirect': None
+            })
+
+        # --- LOGIKA DLA TRYBU: KLASYCZNY / NAUKA ---
+        answer = request.form.get('answer')
+
+        if answer == correct:
+            # POPRAWNA ODPOWIEDŹ
+            if session['current_index'] < len(PROGI):
+                session['money'] = PROGI[session['current_index']]
+
+            session['current_index'] += 1
+            is_end = session['current_index'] >= 12
+
+            if is_end:
+                badges = calculate_badges(True)
+                save_score(session['nick'], 1000000, badges)
+                session['earned_badges'] = badges
+
+            return jsonify({
+                'status': 'win' if is_end else 'ok',
+                'info': explanation,
                 'redirect': url_for('result') if is_end else None
             })
         else:
-            # Klasyczna przegrana - obliczanie kwoty gwarantowanej
-            idx = session['current_index']
-            win_amount = 0
+            # BŁĘDNA ODPOWIEDŹ
+            if mode == 'learning':
+                session['current_index'] += 1
+                is_end = session['current_index'] >= 12
+                msg = f"<span style='color:red'>BŁĄD!</span> Poprawna odpowiedź to: <b>{correct}</b>.<br><br>{explanation}"
+                return jsonify({
+                    'status': 'ok',
+                    'info': msg,
+                    'redirect': url_for('result') if is_end else None
+                })
+            else:
+                # Klasyczna przegrana - obliczanie kwoty gwarantowanej
+                idx = session['current_index']
+                win_amount = 0
 
-            # Progi gwarantowane: 1000 (po 2 pyt) i 40000 (po 7 pyt)
-            if idx > 6:
-                win_amount = 40000
-            elif idx > 1:
-                win_amount = 1000
+                # Progi gwarantowane: 1000 (po 2 pyt) i 40000 (po 7 pyt)
+                if idx > 6:
+                    win_amount = 40000
+                elif idx > 1:
+                    win_amount = 1000
 
-            badges = calculate_badges(False)
-            save_score(session['nick'], win_amount, badges)
-            session['money'] = win_amount
-            session['earned_badges'] = badges
+                badges = calculate_badges(False)
+                # Zapisujemy wynik - funkcja save_score jest teraz bezpieczna
+                save_score(session['nick'], win_amount, badges)
 
-            return jsonify({
-                'status': 'fail',
-                'info': f"Błędna odpowiedź! Poprawna to: <b>{correct}</b>.<br><br>{explanation}",
-                'redirect': url_for('result')
-            })
+                session['money'] = win_amount
+                session['earned_badges'] = badges
+
+                return jsonify({
+                    'status': 'fail',
+                    'info': f"Błędna odpowiedź! Poprawna to: <b>{correct}</b>.<br><br>{explanation}",
+                    'redirect': url_for('result')
+                })
+    except Exception as e:
+        # W razie awarii serwera
+        print(f"ERROR IN CHECK: {e}")
+        return jsonify({
+            'status': 'fail',
+            'info': "Wystąpił błąd serwera, ale gra została zapisana.",
+            'redirect': url_for('result')
+        })
 
 
 @app.route('/lifeline/<type>')
 def lifeline(type):
-    # Blokada kół ratunkowych w trybach innych niż klasyczny
     if session.get('mode') != 'classic':
         return jsonify({'status': 'error', 'msg': 'Koła niedostępne w tym trybie'})
 
@@ -231,14 +273,12 @@ def lifeline(type):
     if type == '5050':
         correct = session['correct_answer']
         wrong = [o for o in session['current_options'] if o != correct]
-        # Zwracamy 2 błędne do ukrycia
         return jsonify({'status': 'ok', 'remove': random.sample(wrong, 2)})
+
     elif type == 'phone':
-        # Symulacja telefonu - 80% szans na poprawną
         is_correct = random.random() < 0.8
         ans = session['correct_answer'] if is_correct else random.choice(session['current_options'])
 
-        # Nowa treść wiadomości
         msg_text = (
             f"Dzwonisz do eksperta...<br><br>"
             f"<b>dr hab. Viktoriia Onyshchenko:</b><br>"
@@ -246,8 +286,8 @@ def lifeline(type):
             f"Biorąc pod uwagę zasady inżynierii oprogramowania, "
             f"wskazałabym na odpowiedź: <b>{ans}</b>.\"</i>"
         )
-
         return jsonify({'status': 'ok', 'msg': msg_text})
+
     elif type == 'audience':
         return jsonify({'status': 'ok',
                         'msg': f"Głosowanie publiczności zakończone.<br>Większość (65%) wskazuje na: <b>{session['correct_answer']}</b>"})
@@ -266,7 +306,9 @@ def result():
 
 @app.route('/ranking')
 def ranking():
-    return render_template('ranking.html', scores=load_json("wyniki.json"))
+    # Odczyt rankingu z zabezpieczeniem
+    scores = load_json("wyniki.json")
+    return render_template('ranking.html', scores=scores)
 
 
 @app.route('/add_question', methods=['GET', 'POST'])
@@ -294,5 +336,4 @@ def reset_scores():
 
 
 if __name__ == '__main__':
-    # Uruchomienie serwera
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -2,80 +2,92 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MILIONERZY - GRA</title>
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --neon-blue: #00f3ff; --neon-pink: #ff0055; --neon-green: #0aff00; --bg-dark: #050510; }
-        body { margin: 0; padding: 20px; background: var(--bg-dark); color: white; font-family: 'Exo 2'; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { margin: 0; padding: 10px; background: var(--bg-dark); color: white; font-family: 'Exo 2'; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
 
         /* Layout Wrappers - Flexbox dla układu kolumnowego */
         .game-wrapper { display: flex; width: 100%; max-width: 1200px; gap: 30px; margin-top: 10px; align-items: flex-start; justify-content: center; }
         .main-col { flex: 3; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .side-col { flex: 1; display: none; /* Domyślnie ukryte, włącza się tylko w classic */ }
+        .side-col { flex: 1; display: none; } /* Domyślnie ukryte na mobile */
 
-        /* TOP BAR */
+        /* TOP BAR - Responsywny */
         .top-bar {
             width: 100%; max-width: 900px;
-            display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid var(--neon-blue); padding: 15px; margin-bottom: 20px;
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
+            border: 1px solid var(--neon-blue); padding: 10px; margin-bottom: 10px;
             background: rgba(0,20,40,0.7);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); box-sizing: border-box;
         }
-        .btn-lobby { background: transparent; border: 1px solid var(--neon-pink); color: var(--neon-pink); padding: 8px 15px; cursor: pointer; font-family: 'Share Tech Mono'; font-size: 0.8rem; text-transform: uppercase; transition: 0.3s; }
-        .btn-lobby:hover { background: var(--neon-pink); color: white; box-shadow: 0 0 10px var(--neon-pink); }
+        .btn-lobby { background: transparent; border: 1px solid var(--neon-pink); color: var(--neon-pink); padding: 5px 10px; cursor: pointer; font-family: 'Share Tech Mono'; font-size: 0.8rem; text-transform: uppercase; transition: 0.3s; }
+        .btn-lobby:hover { background: var(--neon-pink); color: white; }
 
         .mode-display {
-            font-family: 'Share Tech Mono'; font-size: 1rem; letter-spacing: 2px;
-            color: white; text-shadow: 0 0 5px var(--neon-blue); text-transform: uppercase;
+            font-family: 'Share Tech Mono'; font-size: 0.8rem; letter-spacing: 1px;
+            color: white; text-align: center; width: 100%; order: -1; margin-bottom: 5px;
+            text-transform: uppercase;
         }
-
-        .stats-display {
-            color: var(--neon-blue); font-family: 'Share Tech Mono'; font-size: 1.2rem;
-            text-shadow: 0 0 5px var(--neon-blue);
-        }
+        .stats-display { color: var(--neon-blue); font-family: 'Share Tech Mono'; font-size: 1rem; }
 
         /* Question Box */
-        .question-box { width: 100%; max-width: 900px; background: rgba(0,0,0,0.6); border-left: 5px solid var(--neon-blue); padding: 40px; text-align: center; font-size: 1.5rem; margin-bottom: 30px; box-sizing: border-box; margin-top: 10px; }
+        .question-box { width: 100%; max-width: 900px; background: rgba(0,0,0,0.6); border-left: 5px solid var(--neon-blue); padding: 20px; text-align: center; font-size: 1.1rem; margin-bottom: 20px; box-sizing: border-box; margin-top: 10px; line-height: 1.4; }
 
-        /* Stylistyka Bet Panel (Postaw na milion) */
-        .bet-card { background: rgba(255,215,0,0.05); border: 1px solid gold; padding: 20px; width: 100%; max-width: 900px; }
-        .bet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .bet-item { background: rgba(0,0,0,0.4); border: 1px solid #444; padding: 15px; text-align: center; }
-        .bet-controls { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 10px; }
-        .btn-calc { background: #222; border: 1px solid gold; color: gold; width: 40px; height: 40px; cursor: pointer; font-size: 1.2rem; }
-        .btn-calc:hover { background: gold; color: black; }
-        .bet-amount-display { font-family: 'Share Tech Mono'; font-size: 1.2rem; min-width: 100px; }
-
-        /* Standard Answers */
-        .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 900px; }
-        .answer-btn { background: rgba(255,255,255,0.05); border: 1px solid #444; padding: 25px; color: white; cursor: pointer; font-size: 1.1rem; position: relative; transition: 0.3s; }
+        /* Answers - Domyślnie 1 kolumna na mobile */
+        .answers-grid { display: grid; grid-template-columns: 1fr; gap: 15px; width: 100%; max-width: 900px; }
+        .answer-btn { background: rgba(255,255,255,0.05); border: 1px solid #444; padding: 15px; color: white; cursor: pointer; font-size: 1rem; position: relative; transition: 0.3s; min-height: 60px; display: flex; align-items: center; justify-content: center; }
         .answer-btn:hover:not(:disabled) { border-color: var(--neon-blue); background: rgba(0,243,255,0.1); box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
         .answer-btn.hidden { visibility: hidden; opacity: 0; pointer-events: none; }
 
-        /* Lifelines (Koła ratunkowe) */
-        .lifelines-row { display: flex; gap: 20px; margin-bottom: 5px; width: 100%; max-width: 900px; justify-content: center; }
+        /* Lifelines - Mniejsze na mobile */
+        .lifelines-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; width: 100%; justify-content: center; }
         .lifeline-btn {
             background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue);
-            padding: 8px 25px; cursor: pointer; font-family: 'Share Tech Mono'; font-size: 0.9rem;
-            display: flex; align-items: center; gap: 10px; transition: 0.3s;
+            padding: 8px 12px; cursor: pointer; font-family: 'Share Tech Mono'; font-size: 0.8rem;
+            display: flex; align-items: center; gap: 5px; flex: 1 1 auto; justify-content: center;
             clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
-        .lifeline-btn:hover:not(.used) { background: var(--neon-blue); color: black; box-shadow: 0 0 15px var(--neon-blue); transform: translateY(-2px); }
-        .lifeline-btn.used { border-color: #333; color: #444; cursor: not-allowed; text-decoration: line-through; box-shadow: none; }
+        .lifeline-btn.used { border-color: #333; color: #444; cursor: not-allowed; text-decoration: line-through; }
 
         /* Thresholds List (Pasek boczny z kwotami) */
-        .threshold-container { background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 15px; border-radius: 10px; }
+        .threshold-container { background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px; border-radius: 10px; }
+
         .threshold-item {
-            font-family: 'Share Tech Mono'; font-size: 1.1rem; padding: 5px 10px;
-            color: #666; display: flex; justify-content: space-between; transition: 0.3s;
+            font-family: 'Share Tech Mono'; font-size: 0.9rem; padding: 2px 5px;
+            color: #666;
+            display: flex; justify-content: center; /* Wyśrodkowanie, bo usunęliśmy numerki */
+            transition: 0.3s;
         }
-        .threshold-item.active { color: gold; background: rgba(255, 215, 0, 0.1); border: 1px solid gold; font-weight: bold; margin: -1px 0; transform: scale(1.05); }
+
+        .threshold-item.active { color: gold; background: rgba(255, 215, 0, 0.1); border: 1px solid gold; font-weight: bold; transform: scale(1.05); }
         .threshold-item.passed { color: var(--neon-green); }
         .threshold-item.guaranteed { color: white; text-shadow: 0 0 5px white; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; }
-        .modal-content { background: #050510; border: 2px solid var(--neon-blue); padding: 40px; max-width: 500px; text-align: center; box-shadow: 0 0 30px var(--neon-blue); }
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: #050510; border: 2px solid var(--neon-blue); padding: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 0 30px var(--neon-blue); }
+
+        /* Stylistyka Bet Panel */
+        .bet-card { box-sizing: border-box; background: rgba(255,215,0,0.05); border: 1px solid gold; padding: 20px; width: 100%; max-width: 900px; }
+        .bet-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
+        .bet-item { background: rgba(0,0,0,0.4); border: 1px solid #444; padding: 15px; text-align: center; }
+        .bet-controls { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 10px; }
+        .btn-calc { background: #222; border: 1px solid gold; color: gold; width: 40px; height: 40px; cursor: pointer; font-size: 1.2rem; }
+
+        /* --- MEDIA QUERY: TABLET I DESKTOP --- */
+        @media (min-width: 768px) {
+            .answers-grid { grid-template-columns: 1fr 1fr; } /* Wracamy do 2 kolumn */
+            .side-col { display: block; } /* Pokazujemy pasek z kasą */
+            .question-box { padding: 40px; font-size: 1.5rem; }
+            .answer-btn { font-size: 1.1rem; padding: 25px; }
+            .mode-display { width: auto; order: 0; margin-bottom: 0; font-size: 1rem; }
+            .top-bar { padding: 15px; }
+            .lifeline-btn { padding: 10px 20px; font-size: 0.9rem; flex: 0 1 auto; }
+            .bet-grid { grid-template-columns: 1fr 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -100,7 +112,7 @@
         <!-- Kolumna Główna (Pytanie + Odpowiedzi) -->
         <div class="main-col">
 
-            <!-- Koła ratunkowe (PRZENIESIONE TUTAJ - Tylko w trybie Classic) -->
+            <!-- Koła ratunkowe (Tylko w trybie Classic) -->
             {% if mode == 'classic' %}
             <div class="lifelines-row">
                 <button class="lifeline-btn {% if not lifelines['5050'] %}used{% endif %}" onclick="useLifeline('5050')" {% if not lifelines['5050'] %}disabled{% endif %}>
@@ -154,12 +166,12 @@
                     {% set idx_real = loop.length - loop.index %} <!-- Indeks 0-11 -->
                     {% set q_num_real = idx_real + 1 %} <!-- Numer pytania 1-12 -->
 
+                    <!-- USUNIĘTO NUMER PYTANIA I WYŚRODKOWANO KWOTĘ -->
                     <div class="threshold-item
                         {% if q_num == q_num_real %}active{% endif %}
                         {% if q_num > q_num_real %}passed{% endif %}
                         {% if q_num_real == 2 or q_num_real == 7 or q_num_real == 12 %}guaranteed{% endif %}
                     ">
-                        <span>{{ q_num_real }}</span>
                         <span>{{ t }} PLN</span>
                     </div>
                 {% endfor %}

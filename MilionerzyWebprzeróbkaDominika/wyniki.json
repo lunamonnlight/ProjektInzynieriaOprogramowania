@@ -1,5 +1,45 @@
 [
     {
+        "nick": "a",
+        "wynik": 40000,
+        "odznaki": [
+            "🧠 SENIOR DEV"
+        ],
+        "data": "2026-01-13 13:44"
+    },
+    {
+        "nick": "dada",
+        "wynik": 1000,
+        "odznaki": [],
+        "data": "2026-01-13 13:35"
+    },
+    {
+        "nick": "dada",
+        "wynik": 1000,
+        "odznaki": [],
+        "data": "2026-01-13 13:35"
+    },
+    {
+        "nick": "ddd",
+        "wynik": 1000,
+        "odznaki": [],
+        "data": "2026-01-13 13:40"
+    },
+    {
+        "nick": "dd",
+        "wynik": 1000,
+        "odznaki": [],
+        "data": "2026-01-13 13:42"
+    },
+    {
+        "nick": "a",
+        "wynik": 1000,
+        "odznaki": [
+            "⚡ SZYBKI BILL"
+        ],
+        "data": "2026-01-13 13:42"
+    },
+    {
         "nick": "dda",
         "wynik": 0,
         "odznaki": []
@@ -49,5 +89,23 @@
         "wynik": 0,
         "odznaki": [],
         "data": "2026-01-13 12:24"
+    },
+    {
+        "nick": "dadad",
+        "wynik": 0,
+        "odznaki": [],
+        "data": "2026-01-13 13:35"
+    },
+    {
+        "nick": "dd",
+        "wynik": 0,
+        "odznaki": [],
+        "data": "2026-01-13 13:41"
+    },
+    {
+        "nick": "dd",
+        "wynik": 0,
+        "odznaki": [],
+        "data": "2026-01-13 13:44"
     }
 ]
