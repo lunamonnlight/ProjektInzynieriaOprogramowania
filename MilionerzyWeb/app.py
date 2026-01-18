@@ -217,7 +217,7 @@ def ranking():
 @app.route('/reset_scores', methods=['POST'])
 def reset_scores():
     haslo = request.form.get('admin_pass')
-    if haslo == 'admin': # HASŁO DO RESETU
+    if haslo == 'Teraz_mnie_nie_zgadniesz!420': # HASŁO DO RESETU
         save_json("wyniki.json", [])
         return redirect(url_for('ranking'))
     else:
@@ -240,4 +240,5 @@ def add_question():
     return render_template('add_question.html', success=False)
 
 if __name__ == '__main__':
+
     app.run(host='0.0.0.0', port=5000, debug=True)
